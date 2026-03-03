@@ -24,6 +24,12 @@ async function bootstrap() {
     await subscribeToQueue("get-captainInTheRadius", (data) => {
       console.log("Received:", data);
     });
+    await subscribeToQueue("isBlackList-captain", (data) => {
+      console.log("Received:", data);
+    });
+    await subscribeToQueue("get-captain", (data) => {
+      console.log("Received:", data);
+    });
 
 
     server.listen(port, () => {
