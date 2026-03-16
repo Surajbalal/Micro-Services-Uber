@@ -7,7 +7,7 @@ import logo from '../assets/logo.png';
 function CaptainHistory() {
   const { captain } = useContext(CaptainContext);
   const navigate = useNavigate();
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem('captain-token');
 
   // State for rides history
   const [rides, setRides] = useState([]);

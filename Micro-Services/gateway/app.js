@@ -1,7 +1,11 @@
 const express = require('express');
 const expressProxy = require('express-http-proxy');
 
+const cors = require("cors");
+
 const app = express();
+
+app.use(cors({ origin: true, credentials: true }));
 
 app.use('/users',expressProxy('http://localhost:3001'))
 app.use('/captain',expressProxy('http://localhost:3002'))

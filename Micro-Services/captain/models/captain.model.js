@@ -81,8 +81,9 @@ const captainSchema = new mongoose.Schema({
 
 }) 
 
+captainSchema.index({ location: "2dsphere" });
 captainSchema.methods.genrateToken =  function(){
-    const token =  jwt.sign({_id:this._id},process.env.JWT_SECRET,{expiresIn: '24h'});
+    const token =  jwt.sign({_id:this._id, role:'captain'},process.env.JWT_SECRET,{expiresIn: '24h'});
     return token;
 }
 captainSchema.methods.comparePassword = async function(password){

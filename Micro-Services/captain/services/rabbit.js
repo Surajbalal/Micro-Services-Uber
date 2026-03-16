@@ -44,8 +44,11 @@ async function publishToQueue(queue, message) {
                 if (!msg) return;
 
                 if (msg.properties.correlationId === correlationId) {
-                    resolve(JSON.parse(msg.content.toString()));
-                    channel.cancel(msg.fields.consumerTag); // prevent memory leak
+                    const response = JSON.parse(msg.content.toString());
+                    channel.cancel(msg.fields.consumerTag).then(() => {
+                        channel.deleteQueue(replyQueue.queue);
+                        resolve(response);
+                    }).catch(() => resolve(response));
                 }
             },
             { noAck: true }
@@ -81,6 +84,7 @@ async function subscribeToQueue(queue) {
                 console.log("reponse",response);
 
             } else if (queue === "get-captainInTheRadius") {
+                console.log("Processing get-captainInTheRadius for:", data);
                 response = await captainModel.find({
                     location: {
                         $geoWithin: {
@@ -88,6 +92,7 @@ async function subscribeToQueue(queue) {
                         }
                     }
                 });
+                console.log("Query response:", response);
 
             } else if (queue === "captain-update") {
                 response = await captainModel.findByIdAndUpdate(
@@ -109,7 +114,16 @@ async function subscribeToQueue(queue) {
 
         } catch (err) {
             console.error("Queue processing error:", err);
-            channel.ack(msg); // prevent stuck messages
+            
+            // Send error reply to prevent the publisher from hanging indefinitely
+            if (msg.properties.replyTo) {
+                channel.sendToQueue(
+                    msg.properties.replyTo,
+                    Buffer.from(JSON.stringify({ error: err.message })),
+                    { correlationId: msg.properties.correlationId }
+                );
+            }
+            channel.ack(msg);
         }
     });
 }

@@ -32,9 +32,13 @@ async function publishToQueue(queue, message) {
             replyQueue.queue,
             (msg) => {
                 if (!msg) return;
-
+                
                 if (msg.properties.correlationId === correlationId) {
-                    resolve(JSON.parse(msg.content.toString()));
+                    const response = JSON.parse(msg.content.toString());
+                    channel.cancel(msg.fields.consumerTag).then(() => {
+                        channel.deleteQueue(replyQueue.queue);
+                        resolve(response);
+                    }).catch(() => resolve(response));
                 }
             },
             { noAck: true }

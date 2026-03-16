@@ -35,6 +35,7 @@ module.exports.getDistanceTime = async(req,res,next)=>{
  }
 }
 module.exports.getAutoCompleteSuggestions = async(req,res,next)=>{
+    console.log("hello",req);
     try {
         const errors = validationResult(req);
         if(!errors.isEmpty()){

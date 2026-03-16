@@ -9,7 +9,7 @@ function CaptainProtectedWrapper({children}) {
     const navigate = useNavigate();
     const [isloading, setIsloading] = useState(true);
     const {captain, setCaptain} = React.useContext(CaptainDataContext);
-    const token = localStorage.getItem("token");
+    const token = localStorage.getItem("captain-token");
     useEffect(() => {
   if (!token) {
     navigate("/captain-login");
@@ -30,7 +30,7 @@ function CaptainProtectedWrapper({children}) {
     })
     .catch((err) => {
       console.log(err);
-      localStorage.removeItem("token");
+      localStorage.removeItem("captain-token");
       navigate("/captain-login");
     });
 }, [token, navigate, setCaptain]);

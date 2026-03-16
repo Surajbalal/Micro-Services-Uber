@@ -144,7 +144,7 @@ socket.on('ride-started', (ride) => {
           const input = activeField === "pickup" ? pickup : destination;
 
           const response = await axios.get(
-            `${import.meta.env.VITE_BASE_URL}/maps/get-suggestions`,
+            `${import.meta.env.VITE_BASE_URL}/rides/maps/get-suggestions`,
             {
               params: { input },
               headers: {

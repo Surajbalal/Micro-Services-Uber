@@ -15,6 +15,9 @@ module.exports.authUser = async (req,res,next)=>{
     }
     try {
         const decode =  jwt.verify(token,process.env.JWT_SECRET);
+        if (decode.role !== 'user') {
+            return res.status(401).json({message:"Unauthorized access"});
+        }
         const user =await userModel.findById(decode._id);
         
         req.user = user

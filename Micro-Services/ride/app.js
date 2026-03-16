@@ -15,7 +15,10 @@ app.use(express.urlencoded({extended: true}));
 app.use(cookieParser());
 
 // ROUTES
-app.use(cors());
+app.use(cors({
+  origin: ["http://localhost:5173"],
+  credentials: true
+}));
 
 app.use('/', rideRoutes);
 app.use('/maps', mapsRoutes);

@@ -23,7 +23,7 @@ function CaptainHome() {
   const {sendMessage, socket} = useContext(SocketContext)
   const {captain} = useContext(CaptainDataContext);
 
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem('captain-token');
 
 const confirm = async()=>{
   const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/rides/confirm`,
@@ -48,38 +48,43 @@ if(response.status == 200){
 useEffect(() => {
   if (!captain || !sendMessage) return;
 
+  if (!navigator.geolocation) {
+    console.error("Geolocation is not supported by this browser.");
+    return;
+  }
+
   const interval = setInterval(() => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          const { latitude, longitude } = position.coords;
-          const location = { lat: latitude, lng: longitude };
-          setCaptainLocation(location);
-          sendMessage("update-captain-location", {
-            captainId: captain._id,
-            location: location
-          });
-        },
-        (error) => {
-          console.error("Error getting location:", error);
-        }
-      );
-    } else {
-      console.error("Geolocation is not supported by this browser.");
-    }
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const location = {
+          lat: position.coords.latitude,
+          lng: position.coords.longitude,
+        };
+
+        setCaptainLocation(location);
+
+        sendMessage("update-captain-location", {
+          captainId: captain._id,
+          location,
+        });
+      },
+      (error) => {
+        console.error("Error getting location:", error);
+      }
+    );
   }, 10000);
 
   return () => clearInterval(interval);
-}, [captain, sendMessage]);
-
-
-
-
+}, [captain?._id, sendMessage]);
 useEffect(() => {
   if (!socket) return;
 
-  socket.on("new-ride", (ride) => {
-    setRide(ride);
+  socket.on("new-ride", (data) => {
+    setRide({
+       ...data.ride,
+      user: data.user,
+    }
+    );
     setIsRidePopupOpen(true);
     console.log("New ride recieve:", ride);
   });

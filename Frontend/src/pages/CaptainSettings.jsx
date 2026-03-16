@@ -7,7 +7,7 @@ import logo from '../assets/logo.png';
 function CaptainSettings() {
   const { captain, setCaptain } = useContext(CaptainDataContext);
   const navigate = useNavigate();
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem('captain-token');
 
   // Personal Information State
   const [firstName, setFirstName] = useState(captain?.fullName?.firstName || '');

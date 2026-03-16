@@ -10,17 +10,38 @@ module.exports.authUser = async (req,res,next)=>{
         return res.status(401).json({message:"Unauthorized access"})
     }
     // const isBlackListed = await blackListModel.findOne({token})
-    console.log("inside auth user")
-    const isBlackListed = await publishToQueue('isBlackList-user',{token})
-    console.log(isBlackListed,"sdfsdf")
+    let isBlackListed = false;
+    try {
+        console.log("inside auth user")
+        isBlackListed = await publishToQueue('isBlackList-user',{token})
+        console.log(isBlackListed,"sdfsdf")
+    } catch (err) {
+        console.error("RabbitMQ error", err);
+    }
     
     if(isBlackListed){
         return res.status(401).json({message:"Unauthorised"});
     }
     try {
         const decode =  jwt.verify(token,process.env.JWT_SECRET);
+        console.log("decode check",decode);
+        if (decode.role !== 'user') {
+            return res.status(401).json({message:"Unauthorized access"});
+        }
+
         // const user =await userModel.findById(decode._id);
-        const user =await publishToQueue('get-user',{_id: decode._id});
+        let user;
+        try {
+            user = await publishToQueue('get-user',{_id: decode._id});
+        } catch (err) {
+            console.error("RabbitMQ get-user error", err);
+            return res.status(500).json({message: "Failed to fetch user context"});
+        }
+
+        if(!user){
+             return res.status(401).json({message:"Unauthorized access"})
+        }
+        console.log("user test",user);
         
         req.user = user
 

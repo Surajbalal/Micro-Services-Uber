@@ -30,6 +30,7 @@ async function bootstrap() {
     await subscribeToQueue("get-captain", (data) => {
       console.log("Received:", data);
     });
+    await subscribeToQueue("captain-update");
 
 
     server.listen(port, () => {

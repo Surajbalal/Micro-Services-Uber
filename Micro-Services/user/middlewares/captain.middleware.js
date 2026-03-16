@@ -24,6 +24,9 @@ module.exports.authCaptain = async(req, res, next) =>{
         }
 
         const decode  =  jwt.verify(token,process.env.JWT_SECRET);
+        if (decode.role !== 'captain') {
+            return res.status(401).json({message:"Unauthorized"});
+        }
         
         const captain = await captainModel.findById(decode._id);
 

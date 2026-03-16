@@ -36,7 +36,7 @@ const navigate = useNavigate();
       if(response.status == 201){
     const data = response.data;
     setUserData(data.captain);
-    localStorage.setItem("token",data.token);
+    localStorage.setItem("captain-token",data.token);
         alert("Captain registered successfully");
         navigate("/captain-home");
       }

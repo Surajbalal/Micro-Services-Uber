@@ -3,6 +3,7 @@ const rideService = require("../services/ride.service");
 const mapService = require("../services/maps.service");
 const rideModel = require('../models/ride.model')
 const { sendMessageToSocketId } = require("../socket");
+const { publishToQueue } = require("../services/rabbit");
 
 module.exports.createRide = async (req, res) => {
   console.log("helooooooooo caled");
@@ -49,13 +50,19 @@ destination: {
 
     }); 
 
-    ride.otp = "";
-    const userDetails = await rideModel.findOne({_id: ride._id}).populate('user');
-    console.log("this is functionality check",findCaptainInRadius,ride);
+    // ride.otp = "";
+    // const userDetails = await rideModel.findOne({_id: ride._id}).populate('user');
+
+    const userDetails = await publishToQueue("get-user",{_id: req.user._id});
+    // console.log("this is functionality check",findCaptainInRadius,ride);
     findCaptainInRadius.map((captain)=>{
       sendMessageToSocketId(captain.socketId,
          "new-ride",
-        userDetails,
+         {
+          ride,
+          user: userDetails,
+         }
+        
       )
     })
 

@@ -18,7 +18,7 @@ app.use(express.urlencoded({extended: true}));
 app.use(cookieParser());
 
 // ROUTES
-app.use(cors());
+app.use(cors({ origin: true, credentials: true }));
 app.get('/', (req,res)=>{
     res.send("hello world");
 })
