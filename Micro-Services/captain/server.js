@@ -31,7 +31,7 @@ async function bootstrap() {
       console.log("Received:", data);
     });
     await subscribeToQueue("captain-update");
-
+    await subscribeToQueue("CAPTAIN_CREATED");
 
     server.listen(port, () => {
       console.log(`Captain services is running on port ${port}`);

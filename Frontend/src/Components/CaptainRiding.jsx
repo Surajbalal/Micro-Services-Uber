@@ -61,7 +61,7 @@ function CaptainRiding() {
         </Link>
       </div>
       <div className="h-4/5 ">
-        <LiveTracking rideData={rideData} />
+        <LiveTracking rideData={rideData} isCaptain={true} />
       </div>
 
       <div className="h-1/5 p-6 flex justify-between items-center relative bg-yellow-400">

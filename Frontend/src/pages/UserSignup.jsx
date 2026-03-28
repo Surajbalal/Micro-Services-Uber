@@ -8,11 +8,13 @@ function UserSignup() {
   const [password, setPassword] = useState("");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const [userData, setUserData] = useState({});
   const {user,setUser} = useContext(UserDataContext);
   const navigate = useNavigate();
   const submitHandler = async(e) => {
     e.preventDefault();
+    setIsLoading(true);
     const newUser = {
       fullName: {
         firstName: firstName,
@@ -21,14 +23,20 @@ function UserSignup() {
       email: email,
       password: password,
     };
-    const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/users/register`,newUser
-      
-    )
-    if(response.status == 201){
-      const data = response.data;
-      setUser(data.user);
-        localStorage.setItem("token", data.token);
-      navigate('/home')
+    
+    try {
+      const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/users/register`,newUser)
+      if(response.status == 201){
+        const data = response.data;
+        setUser(data.user);
+          localStorage.setItem("token", data.token);
+        navigate('/home')
+      }
+    } catch (error) {
+      console.error("Signup Error", error);
+      alert(error.response?.data?.message || "Signup failed");
+    } finally {
+      setIsLoading(false);
     }
 console.log(userData);
     setEmail("");
@@ -84,9 +92,10 @@ console.log(userData);
           />
           <button
             type="submit"
-            className="w-full bg-black text-white font-semibold py-3 px-4 rounded-lg hover:bg-gray-800 transition-colors duration-200 focus:outline-none focus:ring-4 focus:ring-gray-300 text-base"
+            disabled={isLoading}
+            className="w-full bg-black text-white font-semibold py-3 px-4 rounded-lg hover:bg-gray-800 transition-colors duration-200 focus:outline-none focus:ring-4 focus:ring-gray-300 text-base disabled:opacity-50"
           >
-            Sign Up
+            {isLoading ? 'Creating Account...' : 'Sign Up'}
           </button>
           <p className="text-center text-gray-600">
             Already have an account?{' '}

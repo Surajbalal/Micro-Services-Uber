@@ -11,29 +11,38 @@ function CaptainProtectedWrapper({children}) {
     const {captain, setCaptain} = React.useContext(CaptainDataContext);
     const token = localStorage.getItem("captain-token");
     useEffect(() => {
-  if (!token) {
-    navigate("/captain-login");
-    return;
-  }
-
-  axios
-    .get(`${import.meta.env.VITE_BASE_URL}/captain/profile`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    })
-    .then((response) => {
-      if (response.status === 200) {
-        setCaptain(response.data.captain);
-        setIsloading(false);
-      }
-    })
-    .catch((err) => {
-      console.log(err);
-      localStorage.removeItem("captain-token");
+    if (!token) {
       navigate("/captain-login");
-    });
-}, [token, navigate, setCaptain]);
+      return;
+    }
+
+    const fetchProfile = (retryCount = 0) => {
+      axios
+        .get(`${import.meta.env.VITE_BASE_URL}/captain/profile`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
+        .then((response) => {
+          if (response.status === 200) {
+            setCaptain(response.data.captain);
+            setIsloading(false);
+          } else if (response.status === 202 && retryCount < 5) {
+            // Profile is pending creation, retry based on Retry-After header (default 1s)
+            const retryAfter = response.headers['retry-after'] || 1;
+            setTimeout(() => fetchProfile(retryCount + 1), retryAfter * 1000);
+          }
+        })
+        .catch((err) => {
+          // 401 Unauthorized or other actual errors
+          console.log(err);
+          localStorage.removeItem("captain-token");
+          navigate("/captain-login");
+        });
+    };
+
+    fetchProfile();
+  }, [token, navigate, setCaptain]);
 
     
    if(isloading == true){

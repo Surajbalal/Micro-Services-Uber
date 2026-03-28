@@ -7,11 +7,13 @@ import { CaptainDataContext } from '../Context/CaptainContext';
 function CaptainLogin() {
     const [email, setEmail] = useState('');
     const [password,setPassword] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
     const {captain,setCaptain} = React.useContext(CaptainDataContext);
 
     const submitHandler = async (e) => {
   e.preventDefault();
+  setIsLoading(true);
 
   const user = {
     email: email,
@@ -20,7 +22,7 @@ function CaptainLogin() {
 
   try {
     const response = await axios.post(
-      `${import.meta.env.VITE_BASE_URL}/captain/login`,
+      `${import.meta.env.VITE_BASE_URL}/auth/captains/login`,
       user
     );
 
@@ -35,6 +37,8 @@ function CaptainLogin() {
   } catch (error) {
     console.log(error);
     alert(error.response?.data?.message || "Login failed");
+  } finally {
+    setIsLoading(false);
   }
 };
 
@@ -65,9 +69,10 @@ function CaptainLogin() {
               />
               <button 
                 type="submit" 
-                className="w-full bg-black text-white font-semibold py-3 px-4 rounded-lg hover:bg-gray-800 transition-colors duration-200 focus:outline-none focus:ring-4 focus:ring-gray-300 text-base"
+                disabled={isLoading}
+                className="w-full bg-black text-white font-semibold py-3 px-4 rounded-lg hover:bg-gray-800 transition-colors duration-200 focus:outline-none focus:ring-4 focus:ring-gray-300 text-base disabled:opacity-50"
               >
-                Login as Captain
+                {isLoading ? 'Logging in...' : 'Login as Captain'}
               </button>
            <p className="text-center text-gray-600">
                 Join a fleet?{' '}

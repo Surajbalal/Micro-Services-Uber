@@ -37,13 +37,18 @@ async function publishToQueue(queue, message) {
         }
     );
 
-    const response = await new Promise((resolve) => {
+    const response = await new Promise((resolve, reject) => {
+        const timeout = setTimeout(() => {
+            reject(new Error("RPC Timeout: No reply received from consumer"));
+        }, 5000);
+
         channel.consume(
             replyQueue.queue,
             (msg) => {
                 if (!msg) return;
 
                 if (msg.properties.correlationId === correlationId) {
+                    clearTimeout(timeout);
                     const response = JSON.parse(msg.content.toString());
                     channel.cancel(msg.fields.consumerTag).then(() => {
                         channel.deleteQueue(replyQueue.queue);
@@ -100,6 +105,27 @@ async function subscribeToQueue(queue) {
                     { $set: data.updateData },
                     { new: true }
                 );
+            } else if (queue === "CAPTAIN_CREATED") {
+                try {
+                    const existingCaptain = await captainModel.findOne({ email: data.email });
+                    if (!existingCaptain) {
+                        await captainModel.create({
+                            _id: data.captainId,
+                            fullName: {
+                                firstName: data.firstName,
+                                lastName: data.lastName || ""
+                            },
+                            email: data.email,
+                            vehicle: data.vehicle,
+                            location: { type: "Point", coordinates: [0, 0] }
+                        });
+                        console.log("✅ Synced new captain from Auth:", data.email);
+                    }
+                    response = { success: true };
+                } catch (err) {
+                    console.error("❌ Failed to sync captain:", err.message);
+                    response = { success: false, error: err.message };
+                }
             }
 
             channel.sendToQueue(

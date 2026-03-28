@@ -8,7 +8,7 @@ const captainSchema = new mongoose.Schema({
     'fullName':{
         'firstName':{
             type: String,
-            require: true,
+            required: true,
             minlength:[3,'First name must be at least 3 character']
         },
         'lastName':{
@@ -18,15 +18,15 @@ const captainSchema = new mongoose.Schema({
     },
     'email':{
         type: String,
-        require: true,
+        required: true,
         unique: true
     },
-    'password':{
-        type:String,
-        require: true,
-        select: false,
-        minlength: [7,'Password must be at least 7 character']
-    },
+    // 'password':{
+    //     type:String,
+    //     require: true,
+    //     select: false,
+    //     minlength: [7,'Password must be at least 7 character']
+    // },
     'socketId':{
         type: String,
         
@@ -39,12 +39,12 @@ const captainSchema = new mongoose.Schema({
     'vehicle':{
         'color':{
             type: String,
-            require : true,
+            required : true,
             minlength: [3, 'Color must be at least 3 character']
         },
         'plate':{
             type: String,
-            require: true,
+            required: true,
              minlength: [3, 'Plate must be at least 3 character']
         },
         'capacity':{
@@ -55,7 +55,7 @@ const captainSchema = new mongoose.Schema({
         'vehicleType':{
             type: String,
             enum: ['motorcycle', 'car', 'auto'],
-            require: true
+            required: true
         },
         'location':{
             'lat':{

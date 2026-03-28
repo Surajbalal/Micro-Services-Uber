@@ -1,22 +1,31 @@
 import axios from 'axios';
-import React from 'react'
+import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom';
 
 function FinishRide(props) {
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem('captain-token');
   const endRide = async () =>{
-    const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/rides/end-ride`,
-      {
-        rideId: props.rideData._id,
-      },{
-        headers:{
-          Authorization : `bearer ${token}`
+    try {
+      setIsSubmitting(true);
+      const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/rides/end-ride`,
+        {
+          rideId: props.rideData._id,
+        },{
+          headers:{
+            Authorization : `bearer ${token}`
+          }
         }
+      )
+      if(response.status == 200){
+        navigate('/captain-home')
       }
-    )
-    if(response.status == 200){
-      navigate('/captain-home')
+    } catch (error) {
+      console.error("Error ending ride:", error);
+      alert(error.response?.data?.message || "Failed to end ride.");
+    } finally {
+      setIsSubmitting(false);
     }
   }
    return (
@@ -75,9 +84,10 @@ function FinishRide(props) {
    
        <button
        onClick={endRide}
-       className=" bg-green-600 mt-10 mb-4 text-center w-screen  text-white font-medium p-3 px-10 rounded-lg"
+       disabled={isSubmitting}
+       className=" bg-green-600 mt-10 mb-4 text-center w-screen  text-white font-medium p-3 px-10 rounded-lg disabled:opacity-50"
      >
-       Complete Ride
+       {isSubmitting ? 'Completing Ride...' : 'Complete Ride'}
      </button>
    
    </div>

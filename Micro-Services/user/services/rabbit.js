@@ -37,16 +37,20 @@ async function publishToQueue(queue,message){
             }
          );
 
-         const response = await new Promise((resolve)=>{
+        const response = await new Promise((resolve, reject)=>{
+            const timeout = setTimeout(() => {
+                reject(new Error("RPC Timeout: No reply received from consumer"));
+            }, 5000);
+
             channel.consume(replyQueue.queue,(message)=>{
                 if(message.properties.correlationId == correlationId){
+                    clearTimeout(timeout);
                     resolve(JSON.parse(message.content.toString()));
                 }
-            },{noAck: true}
+            },{noAck: true} 
         ) 
-        return response;
-
          })
+         return response;
 
 
 
@@ -75,14 +79,37 @@ async function subscribeToQueue(queue) {
             response = await userModel.findById(data._id);
           }else if(queue == 'update-user'){
             response = await userModel.findByIdAndUpdate(data._id,{$set: data.updateData});
+          }else if(queue === "USER_CREATED"){
+              try {
+                  const existingUser = await userModel.findOne({ email: data.email });
+                  if (!existingUser) {
+                      await userModel.create({
+                          _id: data.userId,
+                          fullName: {
+                              firstName: data.firstName,
+                              lastName: data.lastName || ""
+                          },
+                          email: data.email
+                      });
+                      console.log("✅ Synced new user from Auth:", data.email);
+                  }
+                  response = { success: true };
+              } catch (err) {
+                  console.error("❌ Failed to sync user:", err.message);
+                  response = { success: false, error: err.message };
+              }
           }
-          channel.sendToQueue(
-            msg.properties.replyTo,
-            Buffer.from(JSON.stringify(response)),
-            {
-                correlationId: msg.properties.correlationId
-            }
-        );
+
+          // Only send a reply if the producer specified a replyTo queue (RPC pattern)
+          if (msg.properties && msg.properties.replyTo) {
+              channel.sendToQueue(
+                msg.properties.replyTo,
+                Buffer.from(JSON.stringify(response)),
+                {
+                    correlationId: msg.properties.correlationId
+                }
+            );
+          }
 
         channel.ack(msg); 
         

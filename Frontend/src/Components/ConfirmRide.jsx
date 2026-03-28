@@ -58,12 +58,11 @@ function ConfirmRide(props) {
         <button
           onClick={() => {
             props.createRide();
-            props.setIsVehicleSearchOpen(true);
-            props.setIsConfirmRidePanelOpen(false);
           }}
-          className="w-full mt-6 bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-4 focus:ring-green-300"
+          disabled={props.isCreatingRide}
+          className="w-full mt-6 bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-4 focus:ring-green-300 disabled:opacity-50"
         >
-          Confirm Ride
+          {props.isCreatingRide ? 'Finding Driver...' : 'Confirm Ride'}
         </button>
       </div>
     </div>

@@ -13,11 +13,13 @@ function CaptainSignup() {
     const [vehiclePlate, setVehiclePlate] = useState("");
     const [vehicleCapacity, setVehicleCapacity] = useState("");
     const [vehicleType, setVehicleType] = useState("");
+    const [isLoading, setIsLoading] = useState(false);
 
 const navigate = useNavigate();
     const {captain, setcaptain} = React.useContext(CaptainDataContext);
     const submitHandler = async (e) => {
       e.preventDefault();
+      setIsLoading(true);
       const newUser = {
         fullName: {
           firstName: firstName,
@@ -32,14 +34,23 @@ const navigate = useNavigate();
           vehicleType: vehicleType,
         },
       }
-      const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/captain/register`,newUser)
-      if(response.status == 201){
-    const data = response.data;
-    setUserData(data.captain);
-    localStorage.setItem("captain-token",data.token);
-        alert("Captain registered successfully");
-        navigate("/captain-home");
+      
+      try {
+        const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/auth/captains/register`,newUser)
+        if(response.status == 201){
+          const data = response.data;
+          setUserData(data.captain);
+          localStorage.setItem("captain-token",data.token);
+          alert("Captain registered successfully");
+          navigate("/captain-home");
+        }
+      } catch (error) {
+        console.error("Signup Error", error);
+        alert(error.response?.data?.message || "Signup failed");
+      } finally {
+        setIsLoading(false);
       }
+      
   console.log(userData);
   setcaptain(userData)
       setEmail("");
@@ -146,9 +157,10 @@ const navigate = useNavigate();
           </div>
           <button
             type="submit"
-            className="w-full bg-black text-white font-semibold py-3 px-4 rounded-lg hover:bg-gray-800 transition-colors duration-200 focus:outline-none focus:ring-4 focus:ring-gray-300 text-base"
+            disabled={isLoading}
+            className="w-full bg-black text-white font-semibold py-3 px-4 rounded-lg hover:bg-gray-800 transition-colors duration-200 focus:outline-none focus:ring-4 focus:ring-gray-300 text-base disabled:opacity-50"
           >
-            Create Captain Account
+            {isLoading ? 'Creating Account...' : 'Create Captain Account'}
           </button>
           <p className="text-center text-gray-600">
             Already have an account?{' '}

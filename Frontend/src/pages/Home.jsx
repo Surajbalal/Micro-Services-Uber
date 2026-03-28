@@ -98,9 +98,11 @@ socket.on('ride-started', (ride) => {
       console.error("Error fetching fare:", error);
     }
   };
+  const [isCreatingRide, setIsCreatingRide] = useState(false);
+
   const createRide = async () => {
     try {
-
+      setIsCreatingRide(true);
       const response = await axios.post(
         `${import.meta.env.VITE_BASE_URL}/rides/create`,
         
@@ -115,8 +117,14 @@ socket.on('ride-started', (ride) => {
           }
       );
       setRideData(response.data);
+      // Only open the waiting panel after ride creation is successful
+      setIsVehicleSearchOpen(true);
+      setIsConfirmRidePanelOpen(false);
     } catch (error) {
-      console.error("Error fetching fare:", error);
+      console.error("Error creating ride:", error);
+      alert(error.response?.data?.message || "Failed to create ride.");
+    } finally {
+      setIsCreatingRide(false);
     }
   };
   useEffect(() => {
@@ -161,7 +169,7 @@ socket.on('ride-started', (ride) => {
       }
     };
 
-    const delay = setTimeout(fetchSuggestions, 300); // Debounce API calls
+    const delay = setTimeout(fetchSuggestions, 500); // Debounce API calls
     return () => clearTimeout(delay);
   }, [pickup, destination, isPanelOpen]);
 
@@ -352,6 +360,7 @@ socket.on('ride-started', (ride) => {
       >
         <ConfirmRide
         createRide={createRide}
+        isCreatingRide={isCreatingRide}
         pickup={pickup}
         fare={fare}
         vehicleType={vehicleType}

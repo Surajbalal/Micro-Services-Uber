@@ -77,15 +77,17 @@ function RidePopUp(props) {
       <div className="flex items-center justify-between w-full gap-3 sm:gap-4">
         <button
           onClick={() => { props.setIsRidePopupOpen(false) }}
-          className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-3 sm:py-4 px-4 sm:px-6 rounded-lg sm:rounded-xl transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-gray-300 text-sm sm:text-base"
+          disabled={props.isAcceptingRide}
+          className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-3 sm:py-4 px-4 sm:px-6 rounded-lg sm:rounded-xl transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-gray-300 text-sm sm:text-base disabled:opacity-50"
         >
           Ignore
         </button>
         <button 
           onClick={() => { props.confirm() }}
-          className="flex-1 bg-gray-900 hover:bg-gray-800 text-white font-medium py-3 sm:py-4 px-4 sm:px-6 rounded-lg sm:rounded-xl transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-gray-300 text-sm sm:text-base"
+          disabled={props.isAcceptingRide}
+          className="flex-1 bg-gray-900 hover:bg-gray-800 text-white font-medium py-3 sm:py-4 px-4 sm:px-6 rounded-lg sm:rounded-xl transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-gray-300 text-sm sm:text-base disabled:opacity-50"
         >
-          Accept
+          {props.isAcceptingRide ? 'Accepting...' : 'Accept'}
         </button>
       </div>
     </div>

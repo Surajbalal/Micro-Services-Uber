@@ -22,6 +22,7 @@ async function bootstrap() {
     await subscribeToQueue("isBlackList-user");
     await subscribeToQueue("get-user");
     await subscribeToQueue("update-user");
+    await subscribeToQueue("USER_CREATED");
     await subscribeToQueue("new-ride", (data) => {
       console.log("Received:", data);
     });

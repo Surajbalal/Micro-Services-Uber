@@ -25,22 +25,32 @@ function CaptainHome() {
 
   const token = localStorage.getItem('captain-token');
 
+  const [isAcceptingRide, setIsAcceptingRide] = useState(false);
+
 const confirm = async()=>{
-  const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/rides/confirm`,
-    {
-      rideId : ride._id,
-      captainId : captain._id ,
-    },
-      {  headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      )
-if(response.status == 200){
-  setIsRidePopupOpen(false);
-  setIsConfirmPopUpOpen(true);
-  setIsRideAccepted(true);
-}
+  try {
+    setIsAcceptingRide(true);
+    const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/rides/confirm`,
+      {
+        rideId : ride._id,
+        captainId : captain._id ,
+      },
+        {  headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        )
+  if(response.status == 200){
+    setIsRidePopupOpen(false);
+    setIsConfirmPopUpOpen(true);
+    setIsRideAccepted(true);
+  }
+  } catch (error) {
+    console.error("Error accepting ride:", error);
+    alert(error.response?.data?.message || "Failed to accept ride.");
+  } finally {
+    setIsAcceptingRide(false);
+  }
 }
 
 
@@ -216,7 +226,8 @@ useEffect(()=>{
       >
         <RidePopUp 
           ride={ride} 
-          confirm={confirm}  
+          confirm={confirm}
+          isAcceptingRide={isAcceptingRide}
           setIsRidePopupOpen={setIsRidePopupOpen} 
           setIsConfirmPopUpOpen={setIsConfirmPopUpOpen}
         />

@@ -9,20 +9,30 @@ import { UserDataContext } from '../Context/UserContext';
 function UserLogin() {
   const [email, setEmail] = useState('');
   const [password,setPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const {user,setUser} = useContext(UserDataContext);
   const navigate = useNavigate();
   const submitHandler = async (e)=>{
      e.preventDefault();
+     setIsLoading(true);
      const user = {
       email : email,
       password : password
      }
-     const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/users/login`,user);
-     if(response.status == 200){
-      const data = response.data;
-      setUser(data.user);
-          localStorage.setItem("token",data.token);
-      navigate('/home');
+     
+     try {
+       const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/users/login`,user);
+       if(response.status == 200){
+        const data = response.data;
+        setUser(data.user);
+            localStorage.setItem("token",data.token);
+        navigate('/home');
+       }
+     } catch (error) {
+       console.error("Login Error", error);
+       alert(error.response?.data?.message || "Login failed");
+     } finally {
+       setIsLoading(false);
      }
     setEmail('');
     setPassword('');
@@ -54,9 +64,10 @@ function UserLogin() {
               />
               <button 
                 type="submit" 
-                className="w-full bg-black text-white font-semibold py-3 px-4 rounded-lg hover:bg-gray-800 transition-colors duration-200 focus:outline-none focus:ring-4 focus:ring-gray-300 text-base"
+                disabled={isLoading}
+                className="w-full bg-black text-white font-semibold py-3 px-4 rounded-lg hover:bg-gray-800 transition-colors duration-200 focus:outline-none focus:ring-4 focus:ring-gray-300 text-base disabled:opacity-50"
               >
-                Login
+                {isLoading ? 'Logging in...' : 'Login'}
               </button>
            <p className="text-center text-gray-600">
                 New here?{' '}

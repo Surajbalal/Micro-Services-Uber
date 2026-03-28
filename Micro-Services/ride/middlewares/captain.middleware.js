@@ -24,9 +24,11 @@ module.exports.authCaptain = async(req, res, next) =>{
             console.log(isBlackList,"indside auth user");
             return res.status(401).json({message:"Unauthorized"});
         }
+        console.log("dcvsdfvsdfvsdfvsdfvsdfvsdvdsfv")
 
         const decode  =  jwt.verify(token,process.env.JWT_SECRET);
         if (decode.role !== 'captain') {
+            console.log("inside role check")
              return res.status(401).json({message:"Unauthorized"});
         }
         

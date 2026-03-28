@@ -4,30 +4,40 @@ import { Link, useNavigate } from 'react-router-dom';
 
 function ConfirmRidePopUp(props) {
   const [otp, setOtp] = useState('')
-  const token = localStorage.getItem('token')
+  const [isLoading, setIsLoading] = useState(false)
+  const token = localStorage.getItem('captain-token')
   const navigate = useNavigate();
   
   const submitHandler = async (e) =>{
       e.preventDefault()
-      const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/rides/start-ride`,
-        {
-           params:{ rideId: props.ride._id,
-            otp: otp,
-          },
-          headers: {
-              Authorization : `bearer ${token}`
+      setIsLoading(true)
+      
+      try {
+        const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/rides/start-ride`,
+          {
+             params:{ rideId: props.ride._id,
+              otp: otp,
             },
+            headers: {
+                Authorization : `bearer ${token}`
+              },
+          }
+        )
+        if(response.status == 200){
+           props.setIsConfirmPopUpOpen(false);
+           props.setIsRidePopupOpen(false);
+           props.setIsRideAccepted(false);
+           navigate('/captain-riding',
+             {
+              state:{ ride: response.data.ride || { ...props.ride, status: "ongoing" } }
+             }
+           )
         }
-      )
-      if(response.status == 200){
-         props.setIsConfirmPopUpOpen(false);
-         props.setIsRidePopupOpen(false);
-         props.setIsRideAccepted(false);
-         navigate('/captain-riding',
-           {
-            state:{ ride:props.ride}
-           }
-         )
+      } catch (error) {
+        console.error("Error starting ride:", error);
+        alert(error.response?.data?.message || "Failed to start ride. Please check the OTP.");
+      } finally {
+        setIsLoading(false)
       }
   }
   
@@ -117,6 +127,7 @@ function ConfirmRidePopUp(props) {
             placeholder="Enter OTP"
             maxLength={6}
             required
+            disabled={isLoading}
           />
         </div>
         
@@ -124,15 +135,17 @@ function ConfirmRidePopUp(props) {
           <button
             type="button"
             onClick={handleClose}
-            className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-3 sm:py-4 px-4 sm:px-6 rounded-lg sm:rounded-xl transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-gray-300 text-sm sm:text-base"
+            disabled={isLoading}
+            className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-3 sm:py-4 px-4 sm:px-6 rounded-lg sm:rounded-xl transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-gray-300 text-sm sm:text-base disabled:opacity-50"
           >
             Cancel
           </button>
           <button 
             type="submit"
-            className="flex-1 bg-gray-900 hover:bg-gray-800 text-white font-medium py-3 sm:py-4 px-4 sm:px-6 rounded-lg sm:rounded-xl transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-gray-300 text-sm sm:text-base"
+            disabled={isLoading}
+            className="flex-1 bg-gray-900 hover:bg-gray-800 text-white font-medium py-3 sm:py-4 px-4 sm:px-6 rounded-lg sm:rounded-xl transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-gray-300 text-sm sm:text-base disabled:opacity-50"
           >
-            Start Ride
+            {isLoading ? 'Starting...' : 'Start Ride'}
           </button>
         </div>
       </form>
